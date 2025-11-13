@@ -1,0 +1,379 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User and Authentication
+model User {
+  id                String             @id @default(uuid())
+  email             String             @unique
+  passwordHash      String
+  firstName         String?
+  lastName          String?
+  avatar            String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  
+  workspaceMembers  WorkspaceMember[]
+  activityLogs      ActivityLog[]
+  
+  @@map("users")
+}
+
+// Workspace (Multi-tenant)
+model Workspace {
+  id                String             @id @default(uuid())
+  name              String
+  slug              String             @unique
+  website           String?
+  industry          String?
+  businessGoal      String?
+  logo              String?
+  brandColorPrimary String?
+  brandColorSecondary String?
+  defaultFromName   String?
+  defaultFromEmail  String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  
+  members           WorkspaceMember[]
+  contacts          Contact[]
+  tags              Tag[]
+  segments          Segment[]
+  campaigns         Campaign[]
+  automations       Automation[]
+  funnels           Funnel[]
+  forms             Form[]
+  pipelines         Pipeline[]
+  activityLogs      ActivityLog[]
+  settings          Settings[]
+  
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  id           String    @id @default(uuid())
+  userId       String
+  workspaceId  String
+  role         String    @default("member") // owner, admin, member
+  invitedAt    DateTime  @default(now())
+  joinedAt     DateTime?
+  
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, workspaceId])
+  @@map("workspace_members")
+}
+
+// Contacts and CRM
+model Contact {
+  id           String              @id @default(uuid())
+  workspaceId  String
+  email        String
+  firstName    String?
+  lastName     String?
+  phone        String?
+  company      String?
+  website      String?
+  address      String?
+  city         String?
+  state        String?
+  country      String?
+  postalCode   String?
+  customFields Json?
+  status       String              @default("active") // active, unsubscribed, bounced
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  
+  workspace    Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  tags         ContactTag[]
+  segments     ContactSegment[]
+  opportunities Opportunity[]
+  formSubmissions FormSubmission[]
+  activityLogs ActivityLog[]
+  
+  @@unique([workspaceId, email])
+  @@map("contacts")
+}
+
+model Tag {
+  id           String       @id @default(uuid())
+  workspaceId  String
+  name         String
+  color        String?
+  createdAt    DateTime     @default(now())
+  
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contacts     ContactTag[]
+  
+  @@unique([workspaceId, name])
+  @@map("tags")
+}
+
+model ContactTag {
+  contactId    String
+  tagId        String
+  assignedAt   DateTime     @default(now())
+  
+  contact      Contact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  tag          Tag          @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  
+  @@id([contactId, tagId])
+  @@map("contact_tags")
+}
+
+model Segment {
+  id           String           @id @default(uuid())
+  workspaceId  String
+  name         String
+  description  String?
+  filters      Json             // Store filter conditions as JSON
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  
+  workspace    Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contacts     ContactSegment[]
+  campaigns    Campaign[]
+  
+  @@map("segments")
+}
+
+model ContactSegment {
+  contactId    String
+  segmentId    String
+  addedAt      DateTime         @default(now())
+  
+  contact      Contact          @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  segment      Segment          @relation(fields: [segmentId], references: [id], onDelete: Cascade)
+  
+  @@id([contactId, segmentId])
+  @@map("contact_segments")
+}
+
+// Campaigns (Email & SMS)
+model Campaign {
+  id             String          @id @default(uuid())
+  workspaceId    String
+  name           String
+  type           String          // email, sms
+  status         String          @default("draft") // draft, scheduled, sending, sent, paused
+  subject        String?
+  fromName       String?
+  fromEmail      String?
+  content        Json?           // Store email/SMS content
+  segmentId      String?
+  scheduledAt    DateTime?
+  sentAt         DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  
+  workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  segment        Segment?        @relation(fields: [segmentId], references: [id])
+  stats          CampaignStat[]
+  
+  @@map("campaigns")
+}
+
+model CampaignStat {
+  id           String       @id @default(uuid())
+  campaignId   String
+  sends        Int          @default(0)
+  opens        Int          @default(0)
+  clicks       Int          @default(0)
+  unsubscribes Int          @default(0)
+  bounces      Int          @default(0)
+  recordedAt   DateTime     @default(now())
+  
+  campaign     Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  
+  @@map("campaign_stats")
+}
+
+// Automations / Workflows
+model Automation {
+  id           String            @id @default(uuid())
+  workspaceId  String
+  name         String
+  description  String?
+  trigger      Json              // Trigger configuration
+  isActive     Boolean           @default(false)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  
+  workspace    Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  steps        AutomationStep[]
+  
+  @@map("automations")
+}
+
+model AutomationStep {
+  id           String       @id @default(uuid())
+  automationId String
+  stepOrder    Int
+  type         String       // send_email, send_sms, wait, add_tag, remove_tag, if_else
+  config       Json         // Step configuration
+  createdAt    DateTime     @default(now())
+  
+  automation   Automation   @relation(fields: [automationId], references: [id], onDelete: Cascade)
+  
+  @@map("automation_steps")
+}
+
+// Funnels and Landing Pages
+model Funnel {
+  id           String         @id @default(uuid())
+  workspaceId  String
+  name         String
+  description  String?
+  visits       Int            @default(0)
+  leads        Int            @default(0)
+  conversions  Int            @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  
+  workspace    Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  pages        LandingPage[]
+  
+  @@map("funnels")
+}
+
+model LandingPage {
+  id           String           @id @default(uuid())
+  funnelId     String
+  title        String
+  slug         String           @unique
+  content      Json             // Page builder content as JSON
+  formId       String?
+  isPublished  Boolean          @default(false)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  
+  funnel       Funnel           @relation(fields: [funnelId], references: [id], onDelete: Cascade)
+  form         Form?            @relation(fields: [formId], references: [id])
+  
+  @@map("landing_pages")
+}
+
+// Forms
+model Form {
+  id           String           @id @default(uuid())
+  workspaceId  String
+  name         String
+  description  String?
+  fields       Json             // Form fields configuration
+  destinationSegmentId String?
+  tagsToApply  Json?            // Array of tag IDs to apply on submission
+  redirectUrl  String?
+  embedCode    String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  
+  workspace    Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  submissions  FormSubmission[]
+  landingPages LandingPage[]
+  
+  @@map("forms")
+}
+
+model FormSubmission {
+  id           String       @id @default(uuid())
+  formId       String
+  contactId    String
+  data         Json         // Submitted form data
+  submittedAt  DateTime     @default(now())
+  
+  form         Form         @relation(fields: [formId], references: [id], onDelete: Cascade)
+  contact      Contact      @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  
+  @@map("form_submissions")
+}
+
+// Pipelines / Opportunities (CRM)
+model Pipeline {
+  id           String          @id @default(uuid())
+  workspaceId  String
+  name         String
+  description  String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  
+  workspace    Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  stages       PipelineStage[]
+  opportunities Opportunity[]
+  
+  @@map("pipelines")
+}
+
+model PipelineStage {
+  id           String          @id @default(uuid())
+  pipelineId   String
+  name         String
+  order        Int
+  color        String?
+  createdAt    DateTime        @default(now())
+  
+  pipeline     Pipeline        @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  opportunities Opportunity[]
+  
+  @@map("pipeline_stages")
+}
+
+model Opportunity {
+  id           String        @id @default(uuid())
+  pipelineId   String
+  stageId      String
+  title        String
+  description  String?
+  value        Float?
+  contactId    String
+  expectedCloseDate DateTime?
+  closedAt     DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  
+  pipeline     Pipeline      @relation(fields: [pipelineId], references: [id], onDelete: Cascade)
+  stage        PipelineStage @relation(fields: [stageId], references: [id])
+  contact      Contact       @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  
+  @@map("opportunities")
+}
+
+// Activity Log
+model ActivityLog {
+  id           String       @id @default(uuid())
+  workspaceId  String
+  contactId    String?
+  userId       String?
+  type         String       // email_sent, email_opened, form_submitted, tag_added, etc.
+  description  String
+  metadata     Json?
+  createdAt    DateTime     @default(now())
+  
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contact      Contact?     @relation(fields: [contactId], references: [id])
+  user         User?        @relation(fields: [userId], references: [id])
+  
+  @@map("activity_logs")
+}
+
+// Settings
+model Settings {
+  id           String       @id @default(uuid())
+  workspaceId  String
+  category     String       // branding, notifications, integrations, etc.
+  config       Json         // Settings configuration as JSON
+  updatedAt    DateTime     @updatedAt
+  
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  
+  @@unique([workspaceId, category])
+  @@map("settings")
+}
