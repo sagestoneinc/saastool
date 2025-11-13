@@ -15,9 +15,10 @@ services:
     
     # Build command
     build_command: |
-      npm install
+      npm install --include=dev
       npx prisma generate
       npm run build
+      npx prisma migrate deploy
     
     # Run command
     run_command: npm start
@@ -46,7 +47,7 @@ services:
     envs:
       # Database connection (populated from database component below)
       - key: DATABASE_URL
-        scope: RUN_TIME
+        scope: RUN_AND_BUILD_TIME
         type: SECRET
       
       # JWT Secret for authentication
