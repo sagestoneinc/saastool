@@ -1,0 +1,136 @@
+# Digital Ocean App Platform Configuration
+# This file defines the infrastructure and deployment configuration for the Sagestone SaaS Platform
+
+name: sagestone-saas-platform
+
+# Services define the components that run in your app
+services:
+  # Main Next.js application
+  - name: web
+    # Build configuration
+    github:
+      repo: sagestoneinc/saastool
+      branch: main
+      deploy_on_push: true
+    
+    # Build command
+    build_command: |
+      npm install
+      npx prisma generate
+      npm run build
+    
+    # Run command
+    run_command: npm start
+    
+    # Environment slug determines region (nyc3, sfo3, etc.)
+    environment_slug: node-js
+    
+    # Instance configuration
+    instance_count: 1
+    instance_size_slug: basic-xs  # $5/month (512 MB RAM, 1 vCPU)
+    # For production, consider: basic-s ($12/month) or professional-xs ($20/month)
+    
+    # HTTP configuration
+    http_port: 3000
+    
+    # Health checks
+    health_check:
+      http_path: /
+      initial_delay_seconds: 30
+      period_seconds: 10
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 3
+    
+    # Environment variables
+    envs:
+      # Database connection (populated from database component below)
+      - key: DATABASE_URL
+        scope: RUN_TIME
+        type: SECRET
+      
+      # JWT Secret for authentication
+      - key: JWT_SECRET
+        scope: RUN_AND_BUILD_TIME
+        type: SECRET
+        value: "REPLACE_WITH_YOUR_SECURE_JWT_SECRET_32_CHARS_MIN"
+      
+      # Next.js URLs (set to your actual domain after deployment)
+      - key: NEXT_PUBLIC_MARKETING_URL
+        scope: RUN_AND_BUILD_TIME
+        value: "${APP_URL}"
+      
+      - key: NEXT_PUBLIC_APP_URL
+        scope: RUN_AND_BUILD_TIME
+        value: "${APP_URL}"
+      
+      # Node environment
+      - key: NODE_ENV
+        scope: RUN_AND_BUILD_TIME
+        value: "production"
+    
+    # Routes define how traffic reaches your app
+    routes:
+      - path: /
+
+# Databases
+databases:
+  # Managed PostgreSQL database
+  - name: db
+    engine: PG
+    version: "16"  # PostgreSQL 16
+    production: true
+    cluster_name: sagestone-db-cluster
+    # Basic plan starts at $15/month
+    # For production, consider Professional at $60/month
+
+# Static sites (optional - if you want to separate marketing from app)
+# static_sites:
+#   - name: marketing
+#     github:
+#       repo: sagestoneinc/saastool
+#       branch: main
+#       deploy_on_push: true
+#     build_command: npm install && npm run build
+#     output_dir: .next/static
+#     routes:
+#       - path: /static
+
+# Workers (optional - for background jobs)
+# workers:
+#   - name: background-worker
+#     github:
+#       repo: sagestoneinc/saastool
+#       branch: main
+#       deploy_on_push: true
+#     build_command: npm install && npx prisma generate
+#     run_command: node workers/background-worker.js
+#     instance_count: 1
+#     instance_size_slug: basic-xxs
+#     envs:
+#       - key: DATABASE_URL
+#         scope: RUN_TIME
+#         type: SECRET
+
+# Jobs (optional - for scheduled tasks)
+# jobs:
+#   - name: daily-cleanup
+#     kind: CRON
+#     schedule: "0 2 * * *"  # Run daily at 2 AM
+#     github:
+#       repo: sagestoneinc/saastool
+#       branch: main
+#       deploy_on_push: true
+#     build_command: npm install && npx prisma generate
+#     run_command: node jobs/cleanup.js
+#     instance_size_slug: basic-xxs
+#     envs:
+#       - key: DATABASE_URL
+#         scope: RUN_TIME
+#         type: SECRET
+
+# Alerts (optional - get notified of deployment events)
+alerts:
+  - rule: DEPLOYMENT_FAILED
+  - rule: DEPLOYMENT_LIVE
+  - rule: DOMAIN_FAILED
