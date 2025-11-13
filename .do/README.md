@@ -51,10 +51,11 @@ A managed PostgreSQL 16 database with:
 ### Environment Variables
 
 Required variables that need to be set:
-- `DATABASE_URL`: Auto-populated from the database component
+- `DATABASE_URL`: Auto-populated from the database component (scope: `RUN_AND_BUILD_TIME`)
 - `JWT_SECRET`: Must be set manually (see deployment guide)
 - `NEXT_PUBLIC_MARKETING_URL`: Set to your app URL
 - `NEXT_PUBLIC_APP_URL`: Set to your app URL
+- `NODE_ENV`: Set to `production` for production builds
 
 ## Customization
 
@@ -121,15 +122,14 @@ jobs:
 ### Build Process
 
 The build command includes:
-1. `npm install` - Installs dependencies
+1. `npm install --include=dev` - Installs all dependencies including devDependencies (needed for TypeScript)
 2. `npx prisma generate` - Generates Prisma Client
 3. `npm run build` - Builds Next.js application
+4. `npx prisma migrate deploy` - Runs database migrations automatically
 
-Note: Database migrations are NOT included in the build by default. Run them separately after deployment:
-
-```bash
-npx prisma migrate deploy
-```
+**Important:**
+- The `--include=dev` flag is required because Digital Ocean's buildpack prunes devDependencies before running the custom build command, but TypeScript needs `@types/node` to compile.
+- The `DATABASE_URL` environment variable must have scope `RUN_AND_BUILD_TIME` (not just `RUN_TIME`) for Prisma to work during the build phase.
 
 ### Deployment Triggers
 
