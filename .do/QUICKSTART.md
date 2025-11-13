@@ -24,7 +24,7 @@ Get your Sagestone SaaS Platform running on Digital Ocean in under 15 minutes!
 Digital Ocean will automatically detect the `.do/app.yaml` configuration:
 
 ✅ Web Service (Next.js)
-- Build: `npm install && npx prisma generate && npm run build`
+- Build: `npm install --include=dev && npx prisma generate && npm run build && npx prisma migrate deploy`
 - Run: `npm start`
 - Port: 3000
 
@@ -71,13 +71,15 @@ Click **"Next"**.
 
 Your app will be available at: `https://your-app-name.ondigitalocean.app`
 
-## 🔧 Post-Deployment (Required)
+## 🔧 Post-Deployment
 
-### Run Database Migrations
+### Database Migrations (Automatic)
 
-After first deployment, you need to initialize the database:
+Good news! Database migrations run automatically during the build process. The build command includes `npx prisma migrate deploy`, so your database schema is always up to date with each deployment.
 
-**Option A: Via Console (Recommended)**
+If you need to run migrations manually (e.g., for a hotfix):
+
+**Option A: Via Console**
 1. Go to your app in Digital Ocean
 2. Click **"Console"** tab
 3. Run:
@@ -91,12 +93,6 @@ After first deployment, you need to initialize the database:
    ```bash
    DATABASE_URL="your-production-url" npx prisma migrate deploy
    ```
-
-**Option C: Use Migration Script**
-```bash
-export DATABASE_URL="your-production-url"
-./.do/deploy-migrations.sh
-```
 
 ### Optional: Seed Demo Data
 
@@ -177,12 +173,27 @@ Digital Ocean will automatically:
 
 ### Build Fails
 
-**Symptom:** "Build failed" error
+**Symptom:** "Build failed" error - Missing @types/node
 
 **Solution:**
-1. Check build logs in DO console
-2. Most common: Prisma Client not generated
-3. Ensure `build_command` includes `npx prisma generate`
+The build command already includes `--include=dev` flag. If you modified it, ensure it's:
+```yaml
+build_command: |
+  npm install --include=dev
+  npx prisma generate
+  npm run build
+  npx prisma migrate deploy
+```
+
+**Symptom:** Prisma DATABASE_URL error during build
+
+**Solution:**
+Ensure `DATABASE_URL` has scope `RUN_AND_BUILD_TIME` in `.do/app.yaml`:
+```yaml
+- key: DATABASE_URL
+  scope: RUN_AND_BUILD_TIME  # Not just RUN_TIME
+  type: SECRET
+```
 
 ### Database Connection Error
 
@@ -208,7 +219,10 @@ Digital Ocean will automatically:
 **Symptom:** Database errors about missing tables
 
 **Solution:**
-Run migrations manually (see Post-Deployment section above)
+Migrations run automatically during build. If you're seeing this error:
+1. Check build logs to see if migrations ran successfully
+2. Verify `DATABASE_URL` is available at build time (scope: `RUN_AND_BUILD_TIME`)
+3. If needed, run migrations manually via Console (see Post-Deployment section)
 
 ## 📚 Next Steps
 

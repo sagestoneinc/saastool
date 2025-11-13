@@ -257,18 +257,21 @@ doctl apps create-deployment YOUR_APP_ID
 DATABASE_URL="your-production-database-url" npx prisma migrate deploy
 ```
 
-**Method 3: Add to Build Command**
+**Method 3: Add to Build Command (Recommended)**
 
-Edit `.do/app.yaml` to include migrations in build:
+Migrations are already included in the build command in `.do/app.yaml`:
 ```yaml
 build_command: |
-  npm install
+  npm install --include=dev
   npx prisma generate
   npm run build
   npx prisma migrate deploy
 ```
 
-Note: This runs migrations on every build. Use with caution in production.
+**Important Notes:**
+- The `--include=dev` flag ensures TypeScript types and other devDependencies are available during build
+- The `DATABASE_URL` must have scope `RUN_AND_BUILD_TIME` (not just `RUN_TIME`) for Prisma to work during build
+- Migrations run automatically on every deployment, ensuring the database schema is always up to date
 
 ### Database Management
 
@@ -522,14 +525,33 @@ npm install logrocket
 
 #### 1. Build Fails
 
-**Error: Prisma Client not generated**
+**Error: Missing required package @types/node**
+```
+It looks like you're trying to use TypeScript but do not have the required package(s) installed.
+Please install @types/node
+```
 ```bash
-# Solution: Ensure build command includes prisma generate
+# Solution: Use --include=dev flag in build command
 build_command: |
-  npm install
+  npm install --include=dev
   npx prisma generate
   npm run build
 ```
+This happens because Digital Ocean buildpack prunes devDependencies before running the custom build command, but TypeScript needs `@types/node` to compile.
+
+**Error: Prisma Client not generated or DATABASE_URL missing**
+```
+Failed to load config file as a TypeScript/JavaScript module
+Error: PrismaConfigEnvError: Missing required environment variable: DATABASE_URL
+```
+```bash
+# Solution: Ensure DATABASE_URL has correct scope in .do/app.yaml
+envs:
+  - key: DATABASE_URL
+    scope: RUN_AND_BUILD_TIME  # Not just RUN_TIME
+    type: SECRET
+```
+Prisma needs `DATABASE_URL` at build time to read the schema during `prisma generate`.
 
 **Error: Out of memory during build**
 ```bash
