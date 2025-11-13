@@ -176,14 +176,15 @@ Digital Ocean will automatically:
 **Symptom:** "Build failed" error - Missing @types/node
 
 **Solution:**
-The build command already includes `--include=dev` flag. If you modified it, ensure it's:
+The build command already includes `--include=dev` flag with proper command chaining. If you modified it, ensure it's:
 ```yaml
 build_command: |
-  npm install --include=dev
-  npx prisma generate
-  npm run build
+  npm install --include=dev &&
+  npx prisma generate &&
+  npm run build &&
   npx prisma migrate deploy
 ```
+Note: The `&&` operators ensure commands run sequentially and stop on first failure.
 
 **Symptom:** Prisma DATABASE_URL error during build
 

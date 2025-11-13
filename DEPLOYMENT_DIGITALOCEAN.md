@@ -262,14 +262,15 @@ DATABASE_URL="your-production-database-url" npx prisma migrate deploy
 Migrations are already included in the build command in `.do/app.yaml`:
 ```yaml
 build_command: |
-  npm install --include=dev
-  npx prisma generate
-  npm run build
+  npm install --include=dev &&
+  npx prisma generate &&
+  npm run build &&
   npx prisma migrate deploy
 ```
 
 **Important Notes:**
 - The `--include=dev` flag ensures TypeScript types and other devDependencies are available during build
+- The `&&` operators chain commands sequentially and stop on first failure
 - The `DATABASE_URL` must have scope `RUN_AND_BUILD_TIME` (not just `RUN_TIME`) for Prisma to work during build
 - Migrations run automatically on every deployment, ensuring the database schema is always up to date
 
@@ -531,13 +532,14 @@ It looks like you're trying to use TypeScript but do not have the required packa
 Please install @types/node
 ```
 ```bash
-# Solution: Use --include=dev flag in build command
+# Solution: Use --include=dev flag with proper command chaining
 build_command: |
-  npm install --include=dev
-  npx prisma generate
-  npm run build
+  npm install --include=dev &&
+  npx prisma generate &&
+  npm run build &&
+  npx prisma migrate deploy
 ```
-This happens because Digital Ocean buildpack prunes devDependencies before running the custom build command, but TypeScript needs `@types/node` to compile.
+This happens because Digital Ocean buildpack prunes devDependencies before running the custom build command, but TypeScript needs `@types/node` to compile. The `&&` operators ensure commands run sequentially and fail fast if any step fails.
 
 **Error: Prisma Client not generated or DATABASE_URL missing**
 ```
