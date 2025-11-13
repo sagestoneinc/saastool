@@ -2,12 +2,30 @@
 
 This guide will help you deploy the Sagestone application to production.
 
+## Quick Links
+
+- **Digital Ocean** (Recommended): See [DEPLOYMENT_DIGITALOCEAN.md](DEPLOYMENT_DIGITALOCEAN.md) for complete guide
+- **Vercel**: See instructions below
+- **Railway**: See Alternative Platforms section
+- **Render**: See Alternative Platforms section
+
+## Deployment Platform Comparison
+
+| Platform | Setup Time | Starting Cost | Managed DB | Auto-SSL | CDN | Best For |
+|----------|------------|---------------|------------|----------|-----|----------|
+| **Digital Ocean** | 10 min | $20/mo | ✅ Yes | ✅ Yes | ✅ Yes | Production apps |
+| **Vercel** | 5 min | $0-20/mo | ❌ No* | ✅ Yes | ✅ Yes | Quick deployments |
+| **Railway** | 10 min | $15/mo | ✅ Yes | ✅ Yes | ❌ No | Simple apps |
+| **Render** | 15 min | $15/mo | ✅ Yes | ✅ Yes | ❌ No | Cost-conscious |
+
+*Vercel requires separate database service
+
 ## Prerequisites
 
 - Node.js 18+ installed
 - PostgreSQL database (local or cloud)
 - Git repository access
-- Vercel account (or other hosting platform)
+- Account on your chosen hosting platform
 
 ## Local Development Setup
 
@@ -125,6 +143,27 @@ This guide will help you deploy the Sagestone application to production.
    - Wait for SSL certificate provisioning (automatic)
 
 ### Alternative Deployment Platforms
+
+#### Digital Ocean App Platform (Recommended)
+
+**Complete guide**: See [DEPLOYMENT_DIGITALOCEAN.md](DEPLOYMENT_DIGITALOCEAN.md)
+
+Quick start:
+1. Go to https://cloud.digitalocean.com/apps
+2. Connect GitHub repository
+3. Digital Ocean auto-detects configuration from `.do/app.yaml`
+4. Set environment variables
+5. Deploy automatically
+
+**Pricing**: Starting at $20/month (web + database)
+
+**Features**:
+- Managed PostgreSQL database with automatic backups
+- Automatic SSL certificates
+- CDN and edge caching included
+- Easy horizontal and vertical scaling
+- Built-in monitoring and alerting
+- 99.99% uptime SLA
 
 #### Railway
 

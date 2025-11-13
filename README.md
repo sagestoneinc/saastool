@@ -161,21 +161,37 @@ npm run build
 npm run start
 ```
 
-### Deploy to Vercel
-This project is optimized for deployment on Vercel:
+### Deployment Options
+
+#### Digital Ocean App Platform (Recommended)
+Full-featured deployment with managed database and auto-scaling:
+
+1. See complete guide: [DEPLOYMENT_DIGITALOCEAN.md](DEPLOYMENT_DIGITALOCEAN.md)
+2. Quick start: Connect GitHub → Deploy automatically
+3. Cost: Starting at $20/month (includes database)
+4. Features: Auto SSL, CDN, managed PostgreSQL, monitoring
+
+#### Vercel
+Fast deployment optimized for Next.js:
 
 1. Push your code to GitHub
 2. Import the project in Vercel
 3. Configure environment variables
 4. Deploy!
 
+#### Other Options
+- **Railway**: Easy setup with PostgreSQL included
+- **Render**: Simple deployment with managed services
+- See [DEPLOYMENT.md](DEPLOYMENT.md) for all options
+
 ### Database Setup
 For production, use a managed PostgreSQL database:
+- **Digital Ocean Managed Database** (recommended with DO deployment)
 - Vercel Postgres
-- Railway
+- Railway PostgreSQL
 - Supabase
 - AWS RDS
-- Render
+- Render PostgreSQL
 
 ## 🔧 Development
 
