@@ -105,7 +105,7 @@ databases:
 #       repo: sagestoneinc/saastool
 #       branch: main
 #       deploy_on_push: true
-#     build_command: npm install && npx prisma generate
+#     build_command: npm install --include=dev && npx prisma generate
 #     run_command: node workers/background-worker.js
 #     instance_count: 1
 #     instance_size_slug: basic-xxs
@@ -123,7 +123,7 @@ databases:
 #       repo: sagestoneinc/saastool
 #       branch: main
 #       deploy_on_push: true
-#     build_command: npm install && npx prisma generate
+#     build_command: npm install --include=dev && npx prisma generate
 #     run_command: node jobs/cleanup.js
 #     instance_size_slug: basic-xxs
 #     envs:

@@ -95,7 +95,7 @@ Uncomment the workers section in `app.yaml` to add background job workers:
 ```yaml
 workers:
   - name: background-worker
-    build_command: npm install && npx prisma generate
+    build_command: npm install --include=dev && npx prisma generate
     run_command: node workers/background-worker.js
 ```
 
@@ -127,8 +127,11 @@ The build command includes:
 3. `npm run build` - Builds Next.js application
 4. `npx prisma migrate deploy` - Runs database migrations automatically
 
+Commands are chained using `&&` operators to ensure sequential execution and fail-fast behavior.
+
 **Important:**
 - The `--include=dev` flag is required because Digital Ocean's buildpack prunes devDependencies before running the custom build command, but TypeScript needs `@types/node` to compile.
+- The `&&` operators ensure commands run sequentially and stop on first failure.
 - The `DATABASE_URL` environment variable must have scope `RUN_AND_BUILD_TIME` (not just `RUN_TIME`) for Prisma to work during the build phase.
 
 ### Deployment Triggers
