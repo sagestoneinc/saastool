@@ -13,11 +13,12 @@ services:
       branch: main
       deploy_on_push: true
     
-    # Build command
+    # Build command - uses pipe format for multi-line commands
+    # Note: --include=dev is critical to keep @types/node for TypeScript compilation
     build_command: |
-      npm install --include=dev
-      npx prisma generate
-      npm run build
+      npm install --include=dev &&
+      npx prisma generate &&
+      npm run build &&
       npx prisma migrate deploy
     
     # Run command
