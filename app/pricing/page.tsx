@@ -81,7 +81,7 @@ export default function PricingPage() {
             Simple, transparent pricing
           </h1>
           <p className="text-xl text-muted-foreground">
-            Choose the plan that's right for your business
+            Choose the plan that&apos;s right for your business
           </p>
         </div>
 

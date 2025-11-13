@@ -17,7 +17,16 @@ export async function GET(request: Request) {
       )
     }
 
-    const where: any = { workspaceId }
+    interface WhereClause {
+      workspaceId: string
+      OR?: Array<{
+        firstName?: { contains: string; mode: 'insensitive' }
+        lastName?: { contains: string; mode: 'insensitive' }
+        email?: { contains: string; mode: 'insensitive' }
+      }>
+    }
+
+    const where: WhereClause = { workspaceId }
 
     // Add search filter
     if (search) {

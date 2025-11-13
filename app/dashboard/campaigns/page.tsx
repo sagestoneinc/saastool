@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Mail, MessageSquare } from "lucide-react"
+import { Mail, MessageSquare } from "lucide-react"
 
 export default function CampaignsPage() {
   const campaigns = [

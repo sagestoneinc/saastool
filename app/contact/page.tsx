@@ -39,7 +39,7 @@ export default function ContactPage() {
             <CardHeader>
               <CardTitle className="text-3xl">Thank you for reaching out!</CardTitle>
               <CardDescription className="text-lg">
-                We've received your message and will get back to you within 24 hours.
+                We&apos;ve received your message and will get back to you within 24 hours.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -56,7 +56,7 @@ export default function ContactPage() {
       <section className="container mx-auto px-4 py-16 md:py-24">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Let's talk
+            Let&apos;s talk
           </h1>
           <p className="text-xl text-muted-foreground">
             Tell us about your business and how we can help you grow

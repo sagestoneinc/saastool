@@ -45,10 +45,10 @@ export default function AboutPage() {
                   Sagestone was born from a simple observation: marketing automation tools were either too complicated for small businesses or too limited for growing companies. We believed there had to be a better way.
                 </p>
                 <p>
-                  Founded by a team of marketing professionals and engineers, we set out to create a platform that combines the power of enterprise tools with the simplicity that small businesses need. Today, we're proud to serve thousands of businesses worldwide.
+                  Founded by a team of marketing professionals and engineers, we set out to create a platform that combines the power of enterprise tools with the simplicity that small businesses need. Today, we&apos;re proud to serve thousands of businesses worldwide.
                 </p>
                 <p>
-                  Our platform helps businesses automate their marketing, manage customer relationships, and drive growth—all from one intuitive interface. We're constantly innovating and adding new features based on feedback from our amazing community.
+                  Our platform helps businesses automate their marketing, manage customer relationships, and drive growth—all from one intuitive interface. We&apos;re constantly innovating and adding new features based on feedback from our amazing community.
                 </p>
               </div>
             </CardContent>
@@ -74,7 +74,7 @@ export default function AboutPage() {
         <div className="bg-gray-50 rounded-lg p-8 max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-4">Join Our Team</h2>
           <p className="text-center text-muted-foreground mb-6">
-            We're always looking for talented individuals who share our passion for building great products.
+            We&apos;re always looking for talented individuals who share our passion for building great products.
           </p>
           <div className="text-center">
             <a href="mailto:careers@sagestone.dev" className="text-blue-600 font-medium hover:underline">
