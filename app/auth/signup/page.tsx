@@ -53,9 +53,17 @@ export default function SignupPage() {
         return
       }
 
-      // Store the token in localStorage
-      if (data.token) {
-        localStorage.setItem("token", data.token)
+      // Store the token
+      localStorage.setItem("auth_token", data.token)
+      
+      // Store user data
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user))
+      }
+      
+      // Store workspace data
+      if (data.workspace) {
+        localStorage.setItem("workspace", JSON.stringify(data.workspace))
       }
 
       // Redirect to dashboard
