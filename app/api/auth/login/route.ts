@@ -4,6 +4,15 @@ import { verifyPassword, generateToken } from '@/lib/auth'
 
 export async function POST(request: Request) {
   try {
+    // Check if DATABASE_URL is configured
+    if (!process.env.DATABASE_URL) {
+      console.error('DATABASE_URL is not configured')
+      return NextResponse.json(
+        { error: 'Database configuration error. Please contact support.' },
+        { status: 503 }
+      )
+    }
+
     const body = await request.json()
     const { email, password } = body
 
@@ -66,6 +75,28 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error('Login error:', error)
+    
+    // Check if it's a database connection error
+    if (error instanceof Error) {
+      // Prisma connection errors
+      if (error.message.includes('Can\'t reach database server') || 
+          error.message.includes('Connection refused') ||
+          error.message.includes('database') && error.message.includes('connect')) {
+        return NextResponse.json(
+          { error: 'Database connection failed. Please contact support.' },
+          { status: 503 }
+        )
+      }
+      
+      // Environment variable errors
+      if (error.message.includes('DATABASE_URL')) {
+        return NextResponse.json(
+          { error: 'Database configuration error. Please contact support.' },
+          { status: 503 }
+        )
+      }
+    }
+    
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
