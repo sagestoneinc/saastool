@@ -21,8 +21,8 @@ export async function GET() {
     healthCheck.checks.environment = 'ok'
   }
 
-  // Check database connectivity
-  if (process.env.DATABASE_URL) {
+  // Check database connectivity (only if DATABASE_URL is configured)
+  if (healthCheck.checks.environment === 'ok') {
     try {
       await prisma.$queryRaw`SELECT 1`
       healthCheck.checks.database = 'ok'

@@ -4,6 +4,10 @@ import { NextResponse } from 'next/server'
  * Checks if an error is a database-related error and returns an appropriate response
  * @param error The caught error
  * @returns NextResponse with appropriate error message and status code, or null if not a database error
+ * 
+ * Note: This function uses string matching for error detection as Prisma connection errors
+ * don't always expose structured error codes. While this is less robust than checking error
+ * codes, it provides practical coverage for common database connectivity issues.
  */
 export function handleDatabaseError(error: unknown): NextResponse | null {
   if (!(error instanceof Error)) {
@@ -11,6 +15,7 @@ export function handleDatabaseError(error: unknown): NextResponse | null {
   }
 
   // Check for Prisma connection errors
+  // These patterns cover common database connectivity issues
   if (
     error.message.includes('Can\'t reach database server') ||
     error.message.includes('Connection refused') ||
