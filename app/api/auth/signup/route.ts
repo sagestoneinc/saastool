@@ -2,9 +2,14 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { hashPassword, generateToken } from '@/lib/auth'
 import { sendWelcomeEmail } from '@/lib/email'
+import { checkDatabaseConfig, handleDatabaseError } from '@/lib/api-utils'
 
 export async function POST(request: Request) {
   try {
+    // Check if DATABASE_URL is configured
+    const configError = checkDatabaseConfig()
+    if (configError) return configError
+
     const body = await request.json()
     const { email, password, firstName, lastName } = body
 
@@ -83,6 +88,11 @@ export async function POST(request: Request) {
     )
   } catch (error) {
     console.error('Signup error:', error)
+    
+    // Check if it's a database connection error
+    const dbError = handleDatabaseError(error)
+    if (dbError) return dbError
+    
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
