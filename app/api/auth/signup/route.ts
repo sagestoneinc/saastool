@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { hashPassword, generateToken } from '@/lib/auth'
+import { sendWelcomeEmail } from '@/lib/email'
 
 export async function POST(request: Request) {
   try {
@@ -53,6 +54,12 @@ export async function POST(request: Request) {
           },
         },
       },
+    })
+
+    // Send welcome email (don't block on this)
+    sendWelcomeEmail(email, firstName).catch((error) => {
+      console.error('Failed to send welcome email:', error)
+      // Don't fail the signup if email fails
     })
 
     // Generate JWT token
