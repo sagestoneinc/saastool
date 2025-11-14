@@ -80,10 +80,20 @@ Generate Prisma client:
 npx prisma generate
 ```
 
-Run database migrations (when ready):
+Run database migrations:
 ```bash
 npx prisma migrate dev --name init
 ```
+
+Seed the database with demo data:
+```bash
+npm run db:seed
+```
+
+This creates a demo admin user with the following credentials:
+- **Email**: `demo@sagestone.dev`
+- **Password**: `password123`
+- **Role**: Owner
 
 5. **Run the development server**
 ```bash
@@ -92,6 +102,8 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to view the marketing site.
 Open [http://localhost:3000/dashboard](http://localhost:3000/dashboard) to view the SaaS app.
+
+**Admin Login**: Navigate to [http://localhost:3000/auth/login](http://localhost:3000/auth/login) and use the demo credentials above.
 
 ## 📁 Project Structure
 
