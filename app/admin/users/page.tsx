@@ -67,7 +67,15 @@ export default function AdminUsersPage() {
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault()
     // TODO: Replace with actual API call
-    console.log("Creating user:", formData)
+    // Avoid logging sensitive info like password
+    console.log("Creating user:", {
+      email: formData.email,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      role: formData.role,
+      workspaceName: formData.workspaceName,
+      workspacePlan: formData.workspacePlan,
+    })
     
     // Mock creation
     const newUser = {
